@@ -2,27 +2,23 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const router = express.Router();
 const mf = require('../helpers/model_functions.js');
-const ph = require('../helpers/post_helpers.js');
-const uh = require('../helpers/user_helpers.js');
-const jwt = require('../middleware/jwt.js');
+const th = require('../helpers/tag_helpers.js');
 
 
 // Define constants
 const consts = require('../helpers/constants');
-const POST = consts.POST;
-const USER = consts.USER;
-const posts_url = consts.posts_url;
+const TAG = consts.TAG;
+const tags_url = consts.tags_url;
 
 router.use(bodyParser.json());
 
 
 
-// Create post
-// Protected - only a verified user can create a post
-router.post('/', jwt.checkJwt, function(req, res, next){
+// Create tag
+router.post('/', function(req, res, next){
     // Validate content type
     if (req.get("content-type") !== "application/json") {
-        return next(ph.get_error(406));
+        return next(th.get_error(406));
     }
 
     // Validate request body

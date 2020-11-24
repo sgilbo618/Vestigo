@@ -1,4 +1,3 @@
-// post_helpers.js
 
 /*--------------------------- Start exports ---------------------------*/
 
@@ -11,7 +10,8 @@ module.exports.build_post = function build_post(data){
         "title": data.title, 
         "location": data.location, 
         "body": data.body,
-        "date": new Date()
+        "date": new Date(),
+        "tags": null
     }
 }
 
