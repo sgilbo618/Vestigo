@@ -61,7 +61,10 @@ module.exports.get_an_entity = function get_an_entity(kind, id){
 module.exports.get_entities = function get_entities(kind){
     const q = datastore.createQuery(kind);
     return datastore.runQuery(q).then( (entities) => {
-        return entities[0].map(ds.from_datastore);
+        if (entities[0]) {
+          return entities[0].map(ds.from_datastore);
+        }
+        return entities[0];
     });
 }
 

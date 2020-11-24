@@ -17,6 +17,20 @@ module.exports.build_post = function build_post(data){
 
 
 /*
+ * Takes in a request body and gets out the attributes to build a post.
+ * Gets today's date to add as edited date. Returns the post object.
+ */
+module.exports.build_put_post = function build_put_post(data){
+    return {
+        "title": data.title, 
+        "location": data.location, 
+        "body": data.body,
+        "edited_date": new Date()
+    }
+}
+
+
+/*
  * Takes in a post object and the data to update. Updates and returns the post
  * object.
  */

@@ -115,7 +115,66 @@ router.get('/', jwt.checkJwt, function(req, res){
 	    .catch( (err) => { console.log(err) });
 	})
 	.catch( (err) => { console.log(err) });
+});
 
+
+// Modify a post - PUT
+// Protected - must contain valid jwt to edit this user's post
+router.put('/:id', jwt.checkJwt, function(req, res, next){
+    // Validate content type
+    if (req.get("content-type") !== "application/json") {
+        return next(ph.get_error(406));
+    }
+
+    // Validate the body has correct attributes (same as post)
+    if (!ph.is_valid_post(req.body)) {
+        return next(ph.get_error(400));
+    }
+
+    // Get the current post
+    const post = mf.get_an_entity(POST, req.params.id)
+    .then( (post) => {    
+        // See if post exists
+        if (!post[0]) {
+            return next(ph.get_error(404));
+        }
+
+        // Get the user of this jwt
+        const user = uh.get_user_by_sub(USER, req.user.sub)
+        .then( (user) => {
+        	// See if user exists and is the owner of this post
+        	if (!user[0] || post[0]["user_id"] != user[0]["id"]) {
+        		return next(uh.get_error(404));
+        	}
+
+	        // Validate accepts type
+	        const accepts = req.accepts("application/json");
+	        if (!accepts) {
+	            return next(ph.get_error(415));
+	        }
+
+	        // Build a new post with the updated info
+	        const updated_post = ph.build_put_post(req.body);
+	        updated_post.date = post[0].date;
+			updated_post.user_name = post[0].user_name;
+			updated_post.user_id = post[0].user_id;
+
+	        // Update post
+	        mf.put_entity(POST, req.params.id, updated_post)
+	        .then( (key) => {
+
+	            // Add extra fields
+	            updated_post["id"] = key.id.toString();
+	            updated_post["self"] = posts_url + '/' + key.id;
+
+	            res.setHeader("Location", updated_post["self"]);
+	            res.status(303).json(updated_post);
+	        })
+	        .catch( (err) => { console.log(err) }); 
+        })
+        .catch( (err) => { console.log(err) });  
+    })
+    .catch( (err) => { console.log(err) });
 });
 
 
