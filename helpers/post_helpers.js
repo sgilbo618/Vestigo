@@ -4,13 +4,14 @@
 
 /*
  * Takes in a request body and gets out the attributes to build a post.
- * Returns the post represented as an object.
+ * Gets today's date to add as well. Returns the post object.
  */
 module.exports.build_post = function build_post(data){
     return {
         "title": data.title, 
         "location": data.location, 
-        "body": data.body
+        "body": data.body,
+        "date": new Date()
     }
 }
 
@@ -54,7 +55,7 @@ module.exports.is_valid_post = function is_valid_post(post){
 
     // Input validation
     if (!is_valid_title(post.title) || !is_valid_location(post.location) || 
-    	is_valid_body(post.body)) {
+    	!is_valid_body(post.body)) {
         return false;
     }
 

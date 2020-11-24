@@ -23,7 +23,7 @@ const datastore = ds.datastore;
  module.exports.get_entities_by_owner = function get_entities_by_owner(kind, owner) {
     const q = datastore.createQuery(kind);
     return datastore.runQuery(q).then( (entities) => {
-        return entities[0].map(ds.from_datastore).filter(item => item.owner == owner);
+        return entities[0].map(ds.from_datastore).filter(item => item.user_id == owner);
     });
  }
 

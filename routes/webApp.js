@@ -9,7 +9,7 @@ const crypto = require("crypto");
 const jwtDecode = require("jwt-decode");
 const credentials = require('../confidential/credentials.js');
 const consts = require('../helpers/constants.js');
-const userHelpers = require('../helpers/user_helpers.js');
+const uh = require('../helpers/user_helpers.js');
 const mf = require('../helpers/model_functions.js');
 
 const router = express.Router();
@@ -81,7 +81,7 @@ router.post('/login', function(req,res){
 		let decodedJwt = jwtDecode(json.id_token);
 		info.jwt = json.id_token;
 
-		const user = userHelpers.get_user_by_sub(USER, decodedJwt.sub)
+		const user = uh.get_user_by_sub(USER, decodedJwt.sub)
 		.then((user) => {
 
 			info.id = user[0].id;
@@ -162,7 +162,7 @@ router.post('/register', function(req,res){
 			info.jwt = json.id_token;
 
 			// Create new user for datastore
-			const new_user = userHelpers.build_user(decodedJwt);
+			const new_user = uh.build_user(decodedJwt);
 			mf.post_entity(USER, new_user)
 			.then((key) => {
 				
