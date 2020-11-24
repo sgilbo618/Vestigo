@@ -34,7 +34,7 @@ module.exports.build_put_post = function build_put_post(data){
  * Takes in a post object and the data to update. Updates and returns the post
  * object.
  */
-module.exports.patch_post = function patch_post(old_post, new_data){
+module.exports.build_patch_post = function build_patch_post(old_post, new_data){
     if (new_data["title"]) {
         old_post["title"] = new_data["title"];
     }
@@ -47,7 +47,9 @@ module.exports.patch_post = function patch_post(old_post, new_data){
     	old_post["body"] = new_data["body"];
     }
 
-    return old_boat;
+    old_post.edited_date = new Date();
+
+    return old_post;
 }
 
 
