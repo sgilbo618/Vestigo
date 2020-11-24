@@ -51,7 +51,7 @@ router.post('/', jwt.checkJwt, function(req, res, next){
 		mf.post_entity(POST, new_post)
 		.then( (key) => {
 
-		    // Add fields to new_boat for json response
+		    // Add fields to new post for json response
 		    new_post["id"] = key.id;
 		    new_post["self"] = posts_url + '/' + key.id;
 		    res.status(201).json(new_post);
