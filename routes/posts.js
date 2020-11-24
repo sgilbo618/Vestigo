@@ -18,7 +18,7 @@ router.use(bodyParser.json());
 
 
 // Create post
-// Protected - must contain valid jwt to create new post
+// Protected - only a verified user can create a post
 router.post('/', jwt.checkJwt, function(req, res, next){
     // Validate content type
     if (req.get("content-type") !== "application/json") {
@@ -64,7 +64,7 @@ router.post('/', jwt.checkJwt, function(req, res, next){
 
 
 // View a post
-// Protected - must contain valid jwt to display this user's post
+// Protected - only a verified user can view their post
 router.get('/:id', jwt.checkJwt, function(req, res, next){
     const post = mf.get_an_entity(POST, req.params.id)
     .then( (post) => {
@@ -95,7 +95,7 @@ router.get('/:id', jwt.checkJwt, function(req, res, next){
 
 
 // View all posts
-// Protected - must contain valid jwt to display all of this user's posts
+// Protected - only a verfied user can view all their posts
 router.get('/', jwt.checkJwt, function(req, res){
 	// Get the user 
 	const user = uh.get_user_by_sub(USER, req.user.sub)
@@ -123,7 +123,7 @@ router.get('/', jwt.checkJwt, function(req, res){
 
 
 // Modify a post - PUT
-// Protected - only the user who owns the post can edit it
+// Protected - only the verified user who owns the post can edit it
 router.put('/:id', jwt.checkJwt, function(req, res, next){
     // Validate content type
     if (req.get("content-type") !== "application/json") {
@@ -184,7 +184,7 @@ router.put('/:id', jwt.checkJwt, function(req, res, next){
 
 
 // Modify a post - PATCH
-// Protected - only the user who owns the post can edit it
+// Protected - only the verified user who owns the post can edit it
 router.patch('/:id', jwt.checkJwt, function(req, res, next){
     // Validate content type
     if (req.get("content-type") !== "application/json") {
@@ -236,5 +236,33 @@ router.patch('/:id', jwt.checkJwt, function(req, res, next){
     .catch( (err) => { console.log(err) });
 });
 
+
+
+// Delete a post
+// Protected - only the verified user who owns the post can delete the post
+router.delete('/:id', jwt.checkJwt, function(req, res, next){
+    const post = mf.get_an_entity(POST, req.params.id)
+    .then( (post) => {
+        // See if this ost exists
+        if (!post[0]) {
+            return next(ph.get_error(404));
+        }
+
+        // Get the user of this jwt
+        const user = uh.get_user_by_sub(USER, req.user.sub)
+		.then( (user) => {
+			// See if user exists and if they own this post
+			if (!user[0] || post[0]["user_id"] != user[0]["id"]) {
+				return next(uh.get_error(404));
+			}
+
+			// Delete post
+        	mf.delete_entity(POST, req.params.id)
+        	.then(res.status(204).end());
+   		})
+    	.catch( (err) => { console.log(err) });
+    })
+    .catch( (err) => { console.log(err) });
+});
 
 module.exports = router;
