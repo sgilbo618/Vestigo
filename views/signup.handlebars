@@ -1,0 +1,23 @@
+<!-- signup.handlebars -->
+
+<div class="jumbotron">
+  <h1 class="display-4">Create New Account</h1>
+  <p class="lead">Please create your account with your email and password.</p>
+  <hr class="my-4">
+</div>
+<div class="container">
+	<form action="/register" method="POST">
+	  <div class="form-group">
+	    <label for="email">Email address</label>
+	    <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp">
+	  </div>
+	  <div class="form-group">
+	    <label for="password">Create password</label>
+	    <input type="password" class="form-control" id="password" name="password">
+	  </div>
+	  <button type="submit" class="btn btn-primary">Sign Up</button>
+	</form>
+</div>
+<div class="container">
+	<p>Already have an account? Click here to <a href="/">sign in</a>.</p>
+</div>
