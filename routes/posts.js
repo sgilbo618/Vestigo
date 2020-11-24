@@ -265,4 +265,30 @@ router.delete('/:id', jwt.checkJwt, function(req, res, next){
     .catch( (err) => { console.log(err) });
 });
 
+
+
+// Catch attempt to PUT on /posts
+router.put('/', function(req, res, next){
+    res.set("Accept", "GET, POST");
+    return next(ph.get_error(405));
+});
+
+// Catch attempt to PATCH on /posts
+router.patch('/', function(req, res, next){
+    res.set("Accept", "GET, POST");
+    return next(ph.get_error(405));
+});
+
+// Catch attempt to DELETE on /posts
+router.delete('/', function(req, res, next){
+    res.set("Accept", "GET, POST");
+    return next(ph.get_error(405));
+});
+
+// Catch attempt to POST on /posts/:id
+router.post('/:id', function(req, res, next){
+	res.set("Accept", "GET, PUT, PATCH, DELETE");
+	return next(ph.get_error(405));
+});
+
 module.exports = router;
