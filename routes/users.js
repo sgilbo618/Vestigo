@@ -8,7 +8,7 @@ const userHelpers = require('../helpers/user_helpers.js');
 // Define constants
 const consts = require('../helpers/constants');
 const USER = consts.USER;
-const users_url = consts.users_url;
+const USERS_URL = consts.USERS_URL;
 
 router.use(bodyParser.json());
 
@@ -22,7 +22,7 @@ router.get('/:id', function(req, res, next){
         }
 
         // Add self
-        user[0]["self"] = users_url + '/' + user[0]["id"];
+        user[0]["self"] = USERS_URL + '/' + user[0]["id"];
 
         const accepts = req.accepts(["application/json"]);
         
@@ -49,7 +49,7 @@ router.get('/', function(req, res){
     .then( (users) => {
         // Loop through users to add self attribute
         users.forEach(function (user) {
-            user["self"] = users_url + '/' + user["id"];
+            user["self"] = USERS_URL + '/' + user["id"];
         });
 
         res.status(200).json(users);

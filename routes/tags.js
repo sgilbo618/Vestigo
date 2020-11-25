@@ -8,7 +8,7 @@ const th = require('../helpers/tag_helpers.js');
 // Define constants
 const consts = require('../helpers/constants');
 const TAG = consts.TAG;
-const tags_url = consts.tags_url;
+const TAGS_URL = consts.TAGS_URL;
 
 router.use(bodyParser.json());
 
@@ -41,7 +41,7 @@ router.post('/', function(req, res, next){
 
 	    // Add fields to new tag for json response
 	    new_tag["id"] = key.id;
-	    new_tag["self"] = tags_url + '/' + key.id;
+	    new_tag["self"] = TAGS_URL + '/' + key.id;
 	    res.status(201).json(new_tag);
 	})
 	.catch( (err) => { console.log(err) });
@@ -59,7 +59,7 @@ router.get('/:id', function(req, res, next){
         }
 
         // Add self
-        tag[0]["self"] = tags_url + '/' + tag[0]["id"];
+        tag[0]["self"] = TAGS_URL + '/' + tag[0]["id"];
         
         // Make sure accept MIME is supported
         const accepts = req.accepts(["application/json"]);
@@ -86,7 +86,7 @@ router.get('/', function(req, res){
     .then( (tags) => {
         // Loop through tags to add self attribute
         tags.forEach(function (tag) {
-            tag["self"] = tags_url + '/' + tag["id"];
+            tag["self"] = TAGS_URL + '/' + tag["id"];
         });
 
         res.status(200).json(tags);
@@ -131,7 +131,7 @@ router.put('/:id', function(req, res, next){
 
             // Add extra fields
             updated_tag["id"] = key.id.toString();
-            updated_tag["self"] = tags_url + '/' + key.id;
+            updated_tag["self"] = TAGS_URL + '/' + key.id;
 
             res.setHeader("Location", updated_tag["self"]);
             res.status(303).json(updated_tag);
@@ -178,7 +178,7 @@ router.patch('/:id', function(req, res, next){
 
             // Add extra fields
             updated_tag["id"] = key.id.toString();
-            updated_tag["self"] = tags_url + '/' + key.id;
+            updated_tag["self"] = TAGS_URL + '/' + key.id;
             res.status(200).json(updated_tag);
         })
         .catch( (err) => { console.log(err) });   

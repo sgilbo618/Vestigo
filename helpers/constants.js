@@ -5,10 +5,10 @@ module.exports.TAG = "Tag";
 //module.exports.COMMENT = "Comment";
 module.exports.USER = "User";
 
-module.exports.posts_url = "http://localhost:8080/posts";
-module.exports.tags_url = "http://localhost:8080/tags";
+module.exports.POSTS_URL = "http://localhost:8080/posts";
+module.exports.TAGS_URL = "http://localhost:8080/tags";
 //module.exports.comments_url = "http://localhost:8080/comments";
-module.exports.users_url = "http://localhost:8080/users";
+module.exports.USERS_URL = "http://localhost:8080/users";
 
 module.exports.redirect_uri = "http://localhost:8080/oauth";
 

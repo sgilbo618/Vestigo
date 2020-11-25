@@ -11,7 +11,7 @@ const jwt = require('../middleware/jwt.js');
 const consts = require('../helpers/constants');
 const POST = consts.POST;
 const USER = consts.USER;
-const posts_url = consts.posts_url;
+const POSTS_URL = consts.POSTS_URL;
 
 router.use(bodyParser.json());
 
@@ -53,7 +53,7 @@ router.post('/', jwt.checkJwt, function(req, res, next){
 
 		    // Add fields to new post for json response
 		    new_post["id"] = key.id;
-		    new_post["self"] = posts_url + '/' + key.id;
+		    new_post["self"] = POSTS_URL + '/' + key.id;
 		    res.status(201).json(new_post);
 		})
 		.catch( (err) => { console.log(err) });
@@ -74,7 +74,7 @@ router.get('/:id', jwt.checkJwt, function(req, res, next){
         }
 
         // Add self
-        post[0]["self"] = posts_url + '/' + post[0]["id"];
+        post[0]["self"] = POSTS_URL + '/' + post[0]["id"];
         
         // Make sure accept MIME is supported
         const accepts = req.accepts(["application/json"]);
@@ -110,7 +110,7 @@ router.get('/', jwt.checkJwt, function(req, res){
 	    .then( (posts) => {
 	        // Loop through posts to add self attribute
 	        posts.forEach(function (post) {
-	            post["self"] = posts_url + '/' + post["id"];
+	            post["self"] = POSTS_URL + '/' + post["id"];
 	        });
 
 	        res.status(200).json(posts);
@@ -170,7 +170,7 @@ router.put('/:id', jwt.checkJwt, function(req, res, next){
 
 	            // Add extra fields
 	            updated_post["id"] = key.id.toString();
-	            updated_post["self"] = posts_url + '/' + key.id;
+	            updated_post["self"] = POSTS_URL + '/' + key.id;
 
 	            res.setHeader("Location", updated_post["self"]);
 	            res.status(303).json(updated_post);
@@ -227,7 +227,7 @@ router.patch('/:id', jwt.checkJwt, function(req, res, next){
 
                 // Add extra fields
                 updated_post["id"] = key.id.toString();
-                updated_post["self"] = posts_url + '/' + key.id;
+                updated_post["self"] = POSTS_URL + '/' + key.id;
                 res.status(200).json(updated_post);
             })
             .catch( (err) => { console.log(err) });   
