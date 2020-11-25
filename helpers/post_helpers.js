@@ -11,7 +11,7 @@ module.exports.build_post = function build_post(data){
         "location": data.location, 
         "body": data.body,
         "date": new Date(),
-        "tags": null
+        "tags": []
     }
 }
 
