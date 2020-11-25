@@ -94,7 +94,6 @@ router.get('/', function(req, res){
 
         // Get posts for this tag and send promise to wait
 
-
         // Add next object if there is one
         if (tags["next"]) {
             tags["items"].push({"next": tags["next"]});
