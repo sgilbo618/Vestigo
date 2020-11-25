@@ -4,6 +4,7 @@ module.exports.POST = "Post";
 module.exports.TAG = "Tag";
 //module.exports.COMMENT = "Comment";
 module.exports.USER = "User";
+module.exports.POST_TAG = "Post_Tag";
 
 module.exports.POSTS_URL = "http://localhost:8080/posts";
 module.exports.TAGS_URL = "http://localhost:8080/tags";

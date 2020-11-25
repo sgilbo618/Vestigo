@@ -68,6 +68,35 @@ const TAGS_URL = consts.TAGS_URL;
 }
 
 
+ module.exports.get_post_tag_by_post_id = function get_post_tag_by_post_id(kind, id) {
+    const q = datastore.createQuery(kind);
+    return datastore.runQuery(q).then( (entities) => {
+        return entities[0].map(ds.from_datastore).filter(item => item.post_id == id);
+    });
+ }
+
+
+ module.exports.get_post_tag = function get_post_tag(kind, post_id, tag_id) {
+    const q = datastore.createQuery(kind)
+    .filter("post_id", "=", post_id)
+    .filter("tag_id", "=", tag_id);
+    return datastore.runQuery(q).then( (entity) => {
+        if (entity[0]) {
+            return entity[0].map(ds.from_datastore);
+        } else {
+            return entity;
+        }
+    });
+ }
+
+ module.exports.delete_post_tag = function delete_post_tag(key) {
+    return datastore.delete(key);
+ }
+
+
+
+// Generic model functions
+
 /*
  * Takes in a kind and the body data of an entity. Creates a new entity in the db.
 */

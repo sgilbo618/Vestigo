@@ -9,6 +9,7 @@ const ph = require('../helpers/post_helpers.js');
 const consts = require('../helpers/constants');
 const POST = consts.POST;
 const TAG = consts.TAG;
+const POST_TAG = consts.POST_TAG;
 const POSTS_URL = consts.POSTS_URL;
 const TAGS_URL = consts.TAGS_URL;
 
@@ -62,23 +63,26 @@ router.put('/', function(req, res, next){
                 return next(get_error(404, "add"));
             }
 
-            // See if tag is already on a post
-            post[0]["tags"].forEach( (pTag) => {
-            	if (pTag["id"] === tag[0]["id"]) {
-            		return next(get_error(403, "add"));
-            	}
-            });
+            // See if this tag is on this post already
+            const post_tag = mf.get_post_tag(POST_TAG, post[0]["id"], tag[0]["id"])
+            .then( (post_tag) => {
 
-            // Build the tag info to add to post tags list
-            const new_tag = {
-            	"id": tag[0]["id"],
-            	"label": tag[0]["label"],
-            }
+                if (post_tag[0]) {
+                    return next(get_error(403, "add"));
+                }
 
-            // Update the tags list for this post
-            post[0]["tags"].push(new_tag);
-            mf.put_entity(POST, req.params.pid, post[0])
-            .then(res.status(204).end());
+                // Build the new post-tag relationship
+                const new_post_tag = {
+                    "post_id": post[0]["id"],
+                    "tag_id": tag[0]["id"],
+                    "tag_label": tag[0]["label"]
+                }
+
+                // Add post-tag to datastore
+                mf.post_entity(POST_TAG, new_post_tag)
+                .then(res.status(204).end());
+            })
+            .catch( (err) => { console.log(err) });
         })
         .catch( (err) => { console.log(err) });
     })
@@ -106,23 +110,18 @@ router.delete('/', function(req, res, next){
             }
 
             // See if tag is on this post
-            let found = false;
-            let count = 0;
-            for (let i = 0; i < post[0]["tags"].length; i++){
-            	if (post[0]["tags"][i]["id"] === tag[0]["id"]) {
-            		found = true;
-            		break;
-            	}
-            	count += 1;
-            }
-            if (!found){
-            	return next(get_error(404, "remove"));
-            }
+            const post_tag = mf.get_post_tag(POST_TAG, post[0]["id"], tag[0]["id"])
+            .then( (post_tag) => {
 
-            // Update post tags - remove tag from position found above
-            post[0]["tags"].splice(count, 1);
-            mf.put_entity(POST, req.params.pid, post[0])
-            .then(res.status(204).end());
+                if (!post_tag[0]) {
+                    return next(get_error(404, "remove"));
+                }
+
+                // Remove post-tag from datastore
+                mf.delete_entity(POST_TAG, post_tag[0]["id"])
+                .then(res.status(204).end());
+            })
+            .catch( (err) => { console.log(err) });
         })
         .catch( (err) => { console.log(err) });
     })

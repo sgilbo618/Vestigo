@@ -85,10 +85,15 @@ router.get('/', function(req, res){
 	//const tags = mf.get_entities(TAG)
     const tags = mf.get_entities_pagination(TAG, 5, req)
     .then( (tags) => {
-        // Loop through tags to add self attribute
+        let promises = [];
+
+        // Loop through tags to add posts and self attribute
         tags["items"].forEach(function (tag) {
             tag["self"] = TAGS_URL + '/' + tag["id"];
         });
+
+        // Get posts for this tag and send promise to wait
+
 
         // Add next object if there is one
         if (tags["next"]) {

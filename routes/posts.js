@@ -11,7 +11,9 @@ const jwt = require('../middleware/jwt.js');
 const consts = require('../helpers/constants');
 const POST = consts.POST;
 const USER = consts.USER;
+const POST_TAG = consts.POST_TAG;
 const POSTS_URL = consts.POSTS_URL;
+const TAGS_URL = consts.TAGS_URL;
 
 router.use(bodyParser.json());
 
@@ -73,21 +75,39 @@ router.get('/:id', jwt.checkJwt, function(req, res, next){
             return next(ph.get_error(404));
         }
 
-        // Add self
-        post[0]["self"] = POSTS_URL + '/' + post[0]["id"];
-        
-        // Make sure accept MIME is supported
-        const accepts = req.accepts(["application/json"]);
-        if (!accepts) {
-            return next(ph.get_error(415));
+        // See if post has tags
+        const post_tags = mf.get_post_tag_by_post_id(POST_TAG, post[0]["id"])
+        .then( (post_tags) => {
+            // Build tags list
+            let tags = [];
 
-        // Return JSON
-        } else if (accepts === "application/json") {
-            res.status(200).json(post[0]);
+            post_tags.forEach( (post_tag) => {
+                tags.push({
+                    "id": post_tag["tag_id"],
+                    "label": post_tag["tag_label"],
+                    "self": TAGS_URL + '/' + post_tag["tag_id"]
+                });
+            });
 
-        } else {
-            res.status(500).send("Content type got messed up");
-        }
+            // Add self and tags
+            post[0]["self"] = POSTS_URL + '/' + post[0]["id"];
+            post[0]["tags"] = tags;
+            
+            // Make sure accept MIME is supported
+            const accepts = req.accepts(["application/json"]);
+            if (!accepts) {
+                return next(ph.get_error(415));
+
+            // Return JSON
+            } else if (accepts === "application/json") {
+                res.status(200).json(post[0]);
+
+            } else {
+                res.status(500).send("Content type got messed up");
+            }
+
+        })
+        .catch( (err) => { console.log(err) });
     })
     .catch( (err) => { console.log(err) });
 });
