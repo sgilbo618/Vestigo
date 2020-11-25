@@ -82,14 +82,20 @@ router.get('/:id', function(req, res, next){
 // View all tags
 router.get('/', function(req, res){
 	// Get all the tags
-	const tags = mf.get_entities(TAG)
+	//const tags = mf.get_entities(TAG)
+    const tags = mf.get_entities_pagination(TAG, 5, req)
     .then( (tags) => {
         // Loop through tags to add self attribute
-        tags.forEach(function (tag) {
+        tags["items"].forEach(function (tag) {
             tag["self"] = TAGS_URL + '/' + tag["id"];
         });
 
-        res.status(200).json(tags);
+        // Add next object if there is one
+        if (tags["next"]) {
+            tags["items"].push({"next": tags["next"]});
+        }
+
+        res.status(200).json(tags["items"]);
     })
     .catch( (err) => { console.log(err) });
 });

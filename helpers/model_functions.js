@@ -8,8 +8,8 @@ const datastore = ds.datastore;
 const consts = require('../helpers/constants');
 const POST = consts.POST;
 const TAG = consts.TAG;
-const POSTS_URL = consts.posts_url;
-const TAGS_URL = consts.tags_url;
+const POSTS_URL = consts.POSTS_URL;
+const TAGS_URL = consts.TAGS_URL;
 
 /*
  * Takes in a kind of entity and a unique name. Searches the db for a match. Returns the resutls.
@@ -32,6 +32,40 @@ const TAGS_URL = consts.tags_url;
         return entities[0].map(ds.from_datastore).filter(item => item.user_id == owner);
     });
  }
+
+
+ module.exports.get_entities_by_owner_pagination = function get_entities_by_owner_pagination(kind, limit, req, owner){
+    var q = datastore.createQuery(kind)
+    .filter("user_id", "=", owner)
+    .limit(limit);
+    
+    const results = {};
+    
+    let baseURL = "";
+    if (kind == POST) {
+        baseURL = POSTS_URL;
+    } else if (kind == TAG) {
+        baseURL = TAGS_URL;
+    }
+
+    // If req has a cursor, then adjust the query to start at that cursor
+    if (Object.keys(req.query).includes("cursor")) {
+        q = q.start(req.query.cursor);
+    }
+
+    // Get the next limit of entities
+    return datastore.runQuery(q)
+    .then( (entities) => {
+        results.items = entities[0].map(ds.from_datastore);
+
+        // See if there are anymore results
+        if(entities[1].moreResults !== ds.Datastore.NO_MORE_RESULTS ){
+            results.next = baseURL + "?cursor=" + entities[1].endCursor;
+        }
+
+        return results;
+    });
+}
 
 
 /*
@@ -77,7 +111,8 @@ module.exports.get_entities = function get_entities(kind){
 
 /*
  * Takes in the kind for the search, the limit of how many results desired, and
- * the request object to check/store the cursor. 
+ * the request object to check/store the cursor. Gets returns the limit amount
+ * of entities, updates the cursor, and provides a link to the next page of results.
 */
 module.exports.get_entities_pagination = function get_entities_pagination(kind, limit, req){
     var q = datastore.createQuery(kind).limit(limit);
@@ -85,9 +120,9 @@ module.exports.get_entities_pagination = function get_entities_pagination(kind, 
     
     let baseURL = "";
     if (kind == POST) {
-        baseURL = posts_url;
+        baseURL = POSTS_URL;
     } else if (kind == TAG) {
-        baseURL = tags_url;
+        baseURL = TAGS_URL;
     }
 
     // If req has a cursor, then adjust the query to start at that cursor
