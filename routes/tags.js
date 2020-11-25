@@ -10,6 +10,7 @@ const consts = require('../helpers/constants');
 const TAG = consts.TAG;
 const POST_TAG = consts.POST_TAG;
 const TAGS_URL = consts.TAGS_URL;
+const POSTS_URL = consts.POSTS_URL;
 
 router.use(bodyParser.json());
 
@@ -59,21 +60,36 @@ router.get('/:id', function(req, res, next){
             return next(th.get_error(404));
         }
 
-        // Add self
-        tag[0]["self"] = TAGS_URL + '/' + tag[0]["id"];
-        
-        // Make sure accept MIME is supported
-        const accepts = req.accepts(["application/json"]);
-        if (!accepts) {
-            return next(th.get_error(415));
+        // See if tag is on posts
+        const post_tags = mf.get_post_tag_by_tag_id(POST_TAG, tag[0]["id"])
+        .then( (post_tags) => {
+            // Build list of posts
+            let posts = [];
+            post_tags.forEach( (post_tag) => {
+                posts.push({
+                    "id": post_tag["post_id"],
+                    "self": POSTS_URL + '/' + post_tag["post_id"]
+                });
+            });
 
-        // Return JSON
-        } else if (accepts === "application/json") {
-            res.status(200).json(tag[0]);
+            // Add self and posts
+            tag[0]["self"] = TAGS_URL + '/' + tag[0]["id"];
+            tag[0]["posts"] = posts;
+            
+            // Make sure accept MIME is supported
+            const accepts = req.accepts(["application/json"]);
+            if (!accepts) {
+                return next(th.get_error(415));
 
-        } else {
-            res.status(500).send("Content type got messed up");
-        }
+            // Return JSON
+            } else if (accepts === "application/json") {
+                res.status(200).json(tag[0]);
+
+            } else {
+                res.status(500).send("Content type got messed up");
+            }
+        })
+        .catch( (err) => { console.log(err) });
     })
     .catch( (err) => { console.log(err) });
 });
@@ -91,16 +107,35 @@ router.get('/', function(req, res){
         // Loop through tags to add posts and self attribute
         tags["items"].forEach(function (tag) {
             tag["self"] = TAGS_URL + '/' + tag["id"];
-        });
 
-        // Get posts for this tag and send promise to wait
+            // Get posts for this tag and send promise to wait list
+            promises.push(mf.get_post_tag_by_tag_id(POST_TAG, tag["id"])
+            .then( (post_tags) => {
+                // Build posts list
+                let posts = [];
+                post_tags.forEach( (post_tag) => {
+                    posts.push({
+                        "id": post_tag["post_id"],
+                        "self": POSTS_URL + '/' + post_tag["post_id"]
+                    });
+                });
+
+                tag["posts"] = posts;
+            })
+            .catch( (err) => { console.log(err) })
+            )
+        });
 
         // Add next object if there is one
         if (tags["next"]) {
             tags["items"].push({"next": tags["next"]});
         }
 
-        res.status(200).json(tags["items"]);
+        // Wait for all the post_tag promises to resolve
+        Promise.all(promises).then(() => {
+            res.status(200).json(tags["items"]);
+        })
+        .catch( (err) => { console.log(err) });
     })
     .catch( (err) => { console.log(err) });
 });
