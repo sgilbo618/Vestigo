@@ -73,11 +73,54 @@ router.put('/', function(req, res, next){
             const new_tag = {
             	"id": tag[0]["id"],
             	"label": tag[0]["label"],
-            	"self": TAGS_URL + '/' + tag[0]["id"]
             }
 
             // Update the tags list for this post
             post[0]["tags"].push(new_tag);
+            mf.put_entity(POST, req.params.pid, post[0])
+            .then(res.status(204).end());
+        })
+        .catch( (err) => { console.log(err) });
+    })
+    .catch( (err) => { console.log(err) });
+});
+
+
+
+// Remove tag from post
+router.delete('/', function(req, res, next){
+    // Get the tag
+    const tag = mf.get_an_entity(TAG, req.params.tid)
+    .then( (tag) => {
+        // See if tag exists
+        if (!tag[0]) {
+            return next(get_error(404, "remove"));
+        }
+
+        // Get the post
+        const post = mf.get_an_entity(POST, req.params.pid)
+        .then( (post) => {
+            // See if post exists
+            if (!post[0]) {
+                return next(get_error(404, "remove"));
+            }
+
+            // See if tag is on this post
+            let found = false;
+            let count = 0;
+            for (let i = 0; i < post[0]["tags"].length; i++){
+            	if (post[0]["tags"][i]["id"] === tag[0]["id"]) {
+            		found = true;
+            		break;
+            	}
+            	count += 1;
+            }
+            if (!found){
+            	return next(get_error(404, "remove"));
+            }
+
+            // Update post tags - remove tag from position found above
+            post[0]["tags"].splice(count, 1);
             mf.put_entity(POST, req.params.pid, post[0])
             .then(res.status(204).end());
         })
