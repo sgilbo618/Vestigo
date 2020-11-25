@@ -160,9 +160,16 @@ router.get('/', jwt.checkJwt, function(req, res){
                 posts["items"].push({"next": posts["next"]});
             }
 
-            // Wait for all the post_tag promises to resolve
-            Promise.all(promises).then(() => {
-                res.status(200).json(posts["items"])
+            // Get count of posts
+            const count = mf.count_entities(POST)
+            .then( (count) => {
+                posts["items"].unshift({"count": count});
+
+                 // Wait for all the post_tag promises to resolve
+                Promise.all(promises).then(() => {
+                    res.status(200).json(posts["items"])
+                })
+                .catch( (err) => { console.log(err) });
             })
             .catch( (err) => { console.log(err) });
 	    })

@@ -11,6 +11,7 @@ const TAG = consts.TAG;
 const POSTS_URL = consts.POSTS_URL;
 const TAGS_URL = consts.TAGS_URL;
 
+
 /*
  * Takes in a kind of entity and a unique name. Searches the db for a match. Returns the resutls.
 */
@@ -33,9 +34,13 @@ const TAGS_URL = consts.TAGS_URL;
     });
  }
 
-
+/*
+ * Takes in a kind and an owner, the limit number of entities to retrieve, and the
+ * req object to get/update cursor. Gets limit entities that are owned by this owner
+ * updates, the curser, and returns the entities.
+*/
  module.exports.get_entities_by_owner_pagination = function get_entities_by_owner_pagination(kind, limit, req, owner){
-    var q = datastore.createQuery(kind)
+    let q = datastore.createQuery(kind)
     .filter("user_id", "=", owner)
     .limit(limit);
     
@@ -68,6 +73,9 @@ const TAGS_URL = consts.TAGS_URL;
 }
 
 
+/*
+ * Takes in a kind and a post id. Gets all the entities that have this post id.
+*/
  module.exports.get_post_tag_by_post_id = function get_post_tag_by_post_id(kind, id) {
     const q = datastore.createQuery(kind);
     return datastore.runQuery(q).then( (entities) => {
@@ -76,6 +84,9 @@ const TAGS_URL = consts.TAGS_URL;
  }
 
 
+/*
+ * Takes in a kind and a tag id. Gets all the entities that have this tag id.
+*/
   module.exports.get_post_tag_by_tag_id = function get_post_tag_by_tag_id(kind, id) {
     const q = datastore.createQuery(kind);
     return datastore.runQuery(q).then( (entities) => {
@@ -84,6 +95,10 @@ const TAGS_URL = consts.TAGS_URL;
  }
 
 
+/*
+ * Takes in a kind and a post id, and tag id. Gets all the entities that have this
+ * post and this tag id.
+*/
  module.exports.get_post_tag = function get_post_tag(kind, post_id, tag_id) {
     const q = datastore.createQuery(kind)
     .filter("post_id", "=", post_id)
@@ -95,10 +110,6 @@ const TAGS_URL = consts.TAGS_URL;
             return entity;
         }
     });
- }
-
- module.exports.delete_post_tag = function delete_post_tag(key) {
-    return datastore.delete(key);
  }
 
 
@@ -199,4 +210,13 @@ module.exports.put_entity = function put_entity(kind, id, data){
 module.exports.delete_entity = function delete_entity(kind, id){
     const key = datastore.key([kind, parseInt(id,10)]);
     return datastore.delete(key);
+}
+
+
+module.exports.count_entities = function count_entities(kind){
+    const q = datastore.createQuery(kind);
+    return datastore.runQuery(q)
+    .then( (entities) => {
+        return entities[0].length;
+    });
 }
