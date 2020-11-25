@@ -33,15 +33,15 @@ module.exports.build_put_tag = function build_put_tag(data){
  */
 module.exports.build_patch_tag = function build_patch_tag(old_tag, new_data){
     if (new_data["label"]) {
-        old_post["label"] = new_data["label"];
+        old_tag["label"] = new_data["label"];
     }
 
     if (new_data["symbol"]) {
-        old_post["symbol"] = new_data["symbol"];
+        old_tag["symbol"] = new_data["symbol"];
     }
 
     if (new_data["description"]) {
-    	old_post["description"] = new_data["description"];
+    	old_tag["description"] = new_data["description"];
     }
 
     return old_tag;
@@ -60,7 +60,7 @@ module.exports.is_valid_post = function is_valid_post(tag){
     }
 
     // Checks for the correct attributes
-    if (!tag.label || !tag.symbol || !post.description){
+    if (!tag.label || !tag.symbol || !tag.description){
         return false;
     }
 
@@ -107,7 +107,7 @@ module.exports.is_valid_patch = function is_valid_patch(data){
         }
 
         // Validate description
-        if (key == "description" && !is_valid_description(date[key])) {
+        if (key == "description" && !is_valid_description(data[key])) {
         	has_good_attributes = false;
         }
     });
