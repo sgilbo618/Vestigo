@@ -128,12 +128,40 @@ router.get('/', jwt.checkJwt, function(req, res){
 		// Get this user's posts
 		const posts = mf.get_entities_by_owner(POST, user[0].id)
 	    .then( (posts) => {
-	        // Loop through posts to add self attribute
+            let promises = [];
+
+	        // Loop through posts to add tags and self attribute
 	        posts.forEach(function (post) {
 	            post["self"] = POSTS_URL + '/' + post["id"];
+
+                // Get the post_tags for this post and push promise to wait list
+                promises.push(mf.get_post_tag_by_post_id(POST_TAG, post["id"])
+                .then( (post_tags) => {
+                    // Build tags list
+                    let tags = [];
+
+                    post_tags.forEach( (post_tag) => {
+                        tags.push({
+                            "id": post_tag["tag_id"],
+                            "label": post_tag["tag_label"],
+                            "self": TAGS_URL + '/' + post_tag["tag_id"]
+                        });
+                    });
+
+                    post["tags"] = tags;
+
+                })
+                .catch( (err) => { console.log(err) })
+                )
 	        });
 
-	        res.status(200).json(posts);
+            // Add next object if there is one
+
+            // Wait for all the post_tag promises to resolve
+            Promise.all(promises).then(() => {
+                res.status(200).json(posts);
+            })
+            .catch( (err) => { console.log(err) });
 	    })
 	    .catch( (err) => { console.log(err) });
 	})
