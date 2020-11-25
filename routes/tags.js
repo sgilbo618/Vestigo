@@ -8,6 +8,7 @@ const th = require('../helpers/tag_helpers.js');
 // Define constants
 const consts = require('../helpers/constants');
 const TAG = consts.TAG;
+const POST_TAG = consts.POST_TAG;
 const TAGS_URL = consts.TAGS_URL;
 
 router.use(bodyParser.json());
@@ -207,9 +208,24 @@ router.delete('/:id', function(req, res, next){
             return next(th.get_error(404));
         }
 
-		// Delete post
-    	mf.delete_entity(TAG, req.params.id)
-    	.then(res.status(204).end());
+        // Get all the post_tags for this tag
+        const post_tags = mf.get_post_tag_by_tag_id(POST_TAG, tag[0]["id"])
+        .then( (post_tags) => {
+            let promises = [];
+
+            // Delete each post_tag and push promise to wait list
+            post_tags.forEach( (post_tag) => {
+                promises.push(mf.delete_entity(POST_TAG, post_tag["id"]));
+            });
+
+            // Delete tag when all post_tags delete promises are resolved
+            Promise.all(promises).then(() => {
+                mf.delete_entity(TAG, req.params.id)
+                .then(res.status(204).end()).catch((err)=>{console.log(err)});
+            })
+            .catch( (err) => { console.log(err) });
+        })
+        .catch( (err) => { console.log(err) });
     })
     .catch( (err) => { console.log(err) });
 });

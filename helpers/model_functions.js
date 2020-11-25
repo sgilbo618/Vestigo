@@ -76,6 +76,14 @@ const TAGS_URL = consts.TAGS_URL;
  }
 
 
+  module.exports.get_post_tag_by_tag_id = function get_post_tag_by_tag_id(kind, id) {
+    const q = datastore.createQuery(kind);
+    return datastore.runQuery(q).then( (entities) => {
+        return entities[0].map(ds.from_datastore).filter(item => item.tag_id == id);
+    });
+ }
+
+
  module.exports.get_post_tag = function get_post_tag(kind, post_id, tag_id) {
     const q = datastore.createQuery(kind)
     .filter("post_id", "=", post_id)

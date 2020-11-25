@@ -311,9 +311,24 @@ router.delete('/:id', jwt.checkJwt, function(req, res, next){
 				return next(uh.get_error(404));
 			}
 
-			// Delete post
-        	mf.delete_entity(POST, req.params.id)
-        	.then(res.status(204).end());
+            // Get the post_tags for this post
+            const post_tags = mf.get_post_tag_by_post_id(POST_TAG, post[0]["id"])
+            .then( (post_tags) => {
+                let promises = [];
+
+                // Delete each post_tag and push promise to wait list
+                post_tags.forEach( (post_tag) => {
+                    promises.push(mf.delete_entity(POST_TAG, post_tag["id"]));
+                });
+
+                // Delete post when all post_tags are deleted
+                Promise.all(promises).then(() => {
+                    mf.delete_entity(POST, req.params.id)
+                    .then(res.status(204).end()).catch((err)=>{console.log(err)});
+                })
+                .catch( (err) => { console.log(err) });
+            })
+            .catch( (err) => { console.log(err) });
    		})
     	.catch( (err) => { console.log(err) });
     })
