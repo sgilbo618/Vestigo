@@ -75,37 +75,50 @@ router.get('/:id', jwt.checkJwt, function(req, res, next){
             return next(ph.get_error(404));
         }
 
-        // See if post has tags
-        const post_tags = mf.get_post_tag_by_post_id(POST_TAG, post[0]["id"])
-        .then( (post_tags) => {
-            // Build tags list
-            let tags = [];
+        // Get the user of this jwt
+        const user = uh.get_user_by_sub(USER, req.user.sub)
+        .then( (user) => {
+            // See if user exists
+            if (!user[0]) {
+                return next(uh.get_error(404));
 
-            post_tags.forEach( (post_tag) => {
-                tags.push({
-                    "id": post_tag["tag_id"],
-                    "label": post_tag["tag_label"],
-                    "self": TAGS_URL + '/' + post_tag["tag_id"]
-                });
-            });
-
-            // Add self and tags
-            post[0]["self"] = POSTS_URL + '/' + post[0]["id"];
-            post[0]["tags"] = tags;
-            
-            // Make sure accept MIME is supported
-            const accepts = req.accepts(["application/json"]);
-            if (!accepts) {
-                return next(ph.get_error(415));
-
-            // Return JSON
-            } else if (accepts === "application/json") {
-                res.status(200).json(post[0]);
-
-            } else {
-                res.status(500).send("Content type got messed up");
+            // See if this user owns this post
+            } else if (post[0]["user_id"] != user[0]["id"]) {
+                return next(ph.get_error(403));
             }
 
+            // See if post has tags
+            const post_tags = mf.get_post_tag_by_post_id(POST_TAG, post[0]["id"])
+            .then( (post_tags) => {
+                // Build tags list
+                let tags = [];
+
+                post_tags.forEach( (post_tag) => {
+                    tags.push({
+                        "id": post_tag["tag_id"],
+                        "label": post_tag["tag_label"],
+                        "self": TAGS_URL + '/' + post_tag["tag_id"]
+                    });
+                });
+
+                // Add self and tags
+                post[0]["self"] = POSTS_URL + '/' + post[0]["id"];
+                post[0]["tags"] = tags;
+                
+                // Make sure accept MIME is supported
+                const accepts = req.accepts(["application/json"]);
+                if (!accepts) {
+                    return next(ph.get_error(415));
+
+                // Return JSON
+                } else if (accepts === "application/json") {
+                    res.status(200).json(post[0]);
+
+                } else {
+                    res.status(500).send("Content type got messed up");
+                }
+            })
+            .catch( (err) => { console.log(err) });
         })
         .catch( (err) => { console.log(err) });
     })
@@ -161,7 +174,7 @@ router.get('/', jwt.checkJwt, function(req, res){
             }
 
             // Get count of posts
-            const count = mf.count_entities(POST)
+            const count = mf.count_entities_for_owner(POST, user[0].id)
             .then( (count) => {
                 posts["items"].unshift({"count": count});
 
@@ -204,10 +217,14 @@ router.put('/:id', jwt.checkJwt, function(req, res, next){
         // Get the user of this jwt
         const user = uh.get_user_by_sub(USER, req.user.sub)
         .then( (user) => {
-        	// See if user exists and is the owner of this post
-        	if (!user[0] || post[0]["user_id"] != user[0]["id"]) {
+        	// See if user exists
+        	if (!user[0]) {
         		return next(uh.get_error(404));
-        	}
+
+            // See if this user owns this post
+        	} else if (post[0]["user_id"] != user[0]["id"]) {
+                return next(ph.get_error(403));
+            }
 
 	        // Validate accepts type
 	        const accepts = req.accepts("application/json");
@@ -266,10 +283,14 @@ router.patch('/:id', jwt.checkJwt, function(req, res, next){
         // Get the user of this jwt
         const user = uh.get_user_by_sub(USER, req.user.sub)
         .then( (user) => {
-        	// See if user exists and is the owner of this post
-        	if (!user[0] || post[0]["user_id"] != user[0]["id"]) {
+        	// See if user exists
+        	if (!user[0]) {
         		return next(uh.get_error(404));
-        	}
+
+            // See if this user owns this post
+        	} else if (post[0]["user_id"] != user[0]["id"]) {
+                return next(ph.get_error(403));
+            }
 	        // Build a new post with the updated info
 	        const updated_post = ph.build_patch_post(post[0], req.body);
 
@@ -310,10 +331,12 @@ router.delete('/:id', jwt.checkJwt, function(req, res, next){
         // Get the user of this jwt
         const user = uh.get_user_by_sub(USER, req.user.sub)
 		.then( (user) => {
-			// See if user exists and if they own this post
-			if (!user[0] || post[0]["user_id"] != user[0]["id"]) {
+			// See if user exists
+			if (!user[0]) {
 				return next(uh.get_error(404));
-			}
+			} else if (post[0]["user_id"] != user[0]["id"]) {
+                return next(ph.get_error(403));
+            }
 
             // Get the post_tags for this post
             const post_tags = mf.get_post_tag_by_post_id(POST_TAG, post[0]["id"])

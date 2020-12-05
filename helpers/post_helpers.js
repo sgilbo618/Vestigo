@@ -130,6 +130,9 @@ module.exports.get_error = function get_error(status){
     if (status == 400){
         error.message = "Something is wrong with the request object";
     
+    } else if (status == 403) {
+        error.message = "This user is not authorized to perform this action on this post"; 
+
     } else if (status == 404) {
         error.message = "No post with this post_id exists";
 

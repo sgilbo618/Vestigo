@@ -220,3 +220,10 @@ module.exports.count_entities = function count_entities(kind){
         return entities[0].length;
     });
 }
+
+module.exports.count_entities_for_owner = function count_entities_for_owner(kind, id){
+    const q = datastore.createQuery(kind);
+    return datastore.runQuery(q).then( (entities) => {
+        return (entities[0].map(ds.from_datastore).filter(item => item.user_id == id)).length;
+    });
+}
