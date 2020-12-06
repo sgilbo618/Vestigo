@@ -138,7 +138,18 @@ router.get('/', function(req, res){
             
             // Wait for all the post_tag promises to resolve
             Promise.all(promises).then(() => {
-                res.status(200).json(tags["items"]);
+                // Make sure accept MIME is supported
+                const accepts = req.accepts(["application/json"]);
+                if (!accepts) {
+                    return next(th.get_error(415));
+
+                // Return JSON
+                } else if (accepts === "application/json") {
+                    res.status(200).json(tags["items"]);
+
+                } else {
+                    res.status(500).send("Content type got messed up");
+                }
             })
             .catch( (err) => { console.log(err) });
         })
