@@ -25,19 +25,19 @@ function get_error(status, entity){
     error.status = status;
 
     if (status == 403 && entity == "add") {
-    	error.message = "The tag with this tag id is already on the post with this post id"; 
+    	error.message = "The tag with this tag_id is already on the post with this post_id"; 
 
     } else if (status == 404 && entity == "add"){
         error.message = "The specified post and/or tag does not exist";
     
     } else if (status == 404 && entity == "post") {
-        error.message = "No post with this post id exists";
+        error.message = "No post with this post_id exists";
 
     } else if (status == 404 && entity == "tag") {
-        error.message = "No tag with this tag id exists";
+        error.message = "No tag with this tag_id exists";
 
 	} else if (status == 404 && entity == "remove"){
-        error.message = "No tag with this tag id is on the post with this post id";
+        error.message = "No tag with this tag_id is on the post with this post_id";
     }
 
     return error;
@@ -52,7 +52,7 @@ router.put('/', function(req, res, next){
     .then( (tag) => {
         // See if tag exists
         if (!tag[0]) {
-            return next(get_error(404, "add"));
+            return next(get_error(404, "tag"));
         }
 
         // Get the post
@@ -60,7 +60,7 @@ router.put('/', function(req, res, next){
         .then( (post) => {
             // See if post exists
             if (!post[0]) {
-                return next(get_error(404, "add"));
+                return next(get_error(404, "post"));
             }
 
             // See if this tag is on this post already
@@ -98,7 +98,7 @@ router.delete('/', function(req, res, next){
     .then( (tag) => {
         // See if tag exists
         if (!tag[0]) {
-            return next(get_error(404, "remove"));
+            return next(get_error(404, "tag"));
         }
 
         // Get the post
@@ -106,7 +106,7 @@ router.delete('/', function(req, res, next){
         .then( (post) => {
             // See if post exists
             if (!post[0]) {
-                return next(get_error(404, "remove"));
+                return next(get_error(404, "tag"));
             }
 
             // See if tag is on this post
