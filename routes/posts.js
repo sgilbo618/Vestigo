@@ -180,7 +180,18 @@ router.get('/', jwt.checkJwt, function(req, res){
 
                  // Wait for all the post_tag promises to resolve
                 Promise.all(promises).then(() => {
-                    res.status(200).json(posts["items"])
+                    // Make sure accept MIME is supported
+                    const accepts = req.accepts(["application/json"]);
+                    if (!accepts) {
+                        return next(ph.get_error(415));
+
+                    // Return JSON
+                    } else if (accepts === "application/json") {
+                        res.status(200).json(posts["items"]);
+
+                    } else {
+                        res.status(500).send("Content type got messed up");
+                    }  
                 })
                 .catch( (err) => { console.log(err) });
             })
@@ -235,7 +246,6 @@ router.put('/:id', jwt.checkJwt, function(req, res, next){
 	        // Build a new post with the updated info
 	        const updated_post = ph.build_put_post(req.body);
 	        updated_post.date = post[0].date;
-	        updated_post.tags = post[0].tags;
 			updated_post.user_name = post[0].user_name;
 			updated_post.user_id = post[0].user_id;
 
