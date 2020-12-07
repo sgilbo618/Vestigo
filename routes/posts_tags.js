@@ -106,7 +106,7 @@ router.delete('/', function(req, res, next){
         .then( (post) => {
             // See if post exists
             if (!post[0]) {
-                return next(get_error(404, "tag"));
+                return next(get_error(404, "post"));
             }
 
             // See if tag is on this post

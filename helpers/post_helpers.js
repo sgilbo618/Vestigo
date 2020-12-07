@@ -110,7 +110,7 @@ module.exports.is_valid_patch = function is_valid_patch(data){
         }
 
         // Validate body
-        if (key == "body" && !is_valid_body(date[key])) {
+        if (key == "body" && !is_valid_body(data[key])) {
         	has_good_attributes = false;
         }
     });

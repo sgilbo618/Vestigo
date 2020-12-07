@@ -257,8 +257,7 @@ router.put('/:id', jwt.checkJwt, function(req, res, next){
 	            updated_post["id"] = key.id.toString();
 	            updated_post["self"] = POSTS_URL + '/' + key.id;
 
-	            res.setHeader("Location", updated_post["self"]);
-	            res.status(303).json(updated_post);
+	            res.status(200).json(updated_post);
 	        })
 	        .catch( (err) => { console.log(err) }); 
         })
